@@ -10,4 +10,8 @@ public class Produto
     public float Estoque { get; set; }
     public DateTime DataCadastro { get; set; }
 
+    // Para mapear a FK com a tabela Categoria
+    public int CategoriaId {  get; set; }
+    public Categoria? Categoria { get; set; }
+
 }
