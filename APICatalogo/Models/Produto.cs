@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace APICatalogo.Models;
 
@@ -25,6 +26,7 @@ public class Produto
 
     // Para mapear a FK com a tabela Categoria
     public int CategoriaId {  get; set; }
+    [JsonIgnore]
     public Categoria? Categoria { get; set; }
 
 }
