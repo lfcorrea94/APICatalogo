@@ -31,6 +31,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+// Inclui o middleware de roteamento sem fazer suposição de roteamento.
+// Faz com que dependa do roteamento dos atributos que utilizamos no controllador. É usado para mapear qualquer atributo
+// que existe nos controlladores utilizando os atributos Route
 app.MapControllers();
 
 app.Run();

@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
 {
-    [Route("[controller]")]
-    [ApiController]
+    [Route("[controller]")] // Roteamento padrão para o nome do controlador 'Categorias'
+    [ApiController] // Aplica regras de inferência para fontes de dados (abstrair notações como FromBody, FromForm, etc)
     public class CategoriasController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -26,21 +26,37 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            var categorias = _context.Categorias.AsNoTracking().ToList();
+            try
+            {
+                var categorias = _context.Categorias.AsNoTracking().ToList();
 
-            if (categorias is null) return NotFound("Produtos não encontrados...");
-
-            return categorias;
+                if (categorias is null) return NotFound("Produtos não encontrados...");
+                return categorias;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                     "Ocorreu um erro ao tratar a sua solicitação.");
+            }
         }
 
         [HttpGet("{id:int}", Name = "ObteCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
-            var categorias = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+            try
+            {
+                var categorias = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
 
-            if (categorias == null) return NotFound("Categoria não encontrado");
+                if (categorias == null) return NotFound("Categoria não encontrado...");
 
-            return Ok(categorias);
+                return Ok(categorias);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Ocorreu um erro ao tratar a sua solicitação.");
+            }
+
         }
 
         [HttpPost]

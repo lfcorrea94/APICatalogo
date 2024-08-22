@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
 {
-    [Route("[controller]")]
+    //[Route("[controller]/aprovar-orcamento")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase
     {
@@ -17,6 +18,18 @@ namespace APICatalogo.Controllers
                 _context = context;
         }
 
+        // api/produtos
+        [HttpGet("primeiro")]
+        public ActionResult<Produto> GetPrimeiro()
+        {
+            var produto = _context.Produtos.AsNoTracking().FirstOrDefault();
+
+            if (produto is null) return NotFound("Produto não encontrados...");
+
+            return produto;
+        }
+
+        // api/produtos
         [HttpGet]
         public ActionResult<IEnumerable<Produto>> Get()
         {
@@ -27,6 +40,7 @@ namespace APICatalogo.Controllers
             return produtos;
         }
 
+        // api/produtos/id
         [HttpGet("{id:int}", Name="ObterProduto")]
         public ActionResult<Produto> Get(int id)
         {
@@ -37,6 +51,7 @@ namespace APICatalogo.Controllers
             return produto;
         }
 
+        // api/produtos -> mesmo tendo a mesma roda, o verbo é diferente. Então o método só será atendido pelo request POST
         [HttpPost]
         public ActionResult Post(Produto produto)
         {
@@ -48,6 +63,7 @@ namespace APICatalogo.Controllers
                 new { id = produto.ProdutoId }, produto);
         }
 
+        // api/produtos/id -> mesmo tendo a mesma roda, o verbo é diferente. Então o método só será atendido pelo request PUT
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Produto produto)
         {
@@ -60,6 +76,7 @@ namespace APICatalogo.Controllers
 
         }
 
+        // api/produtos -> mesmo tendo a mesma roda, o verbo é diferente. Então o método só será atendido pelo request DELETE
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
