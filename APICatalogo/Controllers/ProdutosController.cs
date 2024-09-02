@@ -19,6 +19,8 @@ namespace APICatalogo.Controllers
         }
 
         // api/produtos
+        //[HttpGet("/primeiro")]
+        //[HttpGet("{valor:alpha:length(5)}")]
         [HttpGet("primeiro")]
         public ActionResult<Produto> GetPrimeiro()
         {
@@ -41,7 +43,7 @@ namespace APICatalogo.Controllers
         }
 
         // api/produtos/id
-        [HttpGet("{id:int}", Name="ObterProduto")]
+        [HttpGet("{id:int:min(1)}", Name="ObterProduto")]
         public ActionResult<Produto> Get(int id)
         {
             var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.ProdutoId == id);
