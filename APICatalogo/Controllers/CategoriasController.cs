@@ -45,6 +45,9 @@ namespace APICatalogo.Controllers
         {
             try
             {
+                // Teste (tirar o try dps pra testar)
+                // throw new Exception("Exceção ao retornar a categoria pelo Id");
+
                 var categorias = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
 
                 if (categorias == null) return NotFound("Categoria não encontrado...");
