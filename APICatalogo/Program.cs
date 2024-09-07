@@ -1,5 +1,6 @@
 using APICatalogo.Context;
 using APICatalogo.Extensions;
+using APICatalogo.Logging;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -18,6 +19,12 @@ string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConne
 // Instância de builder para definir o provedor, registrar e definir o contexto registrando os serviços no container DI
 builder.Services.AddDbContext<AppDbContext>( options=>options.UseMySql(mySqlConnection,
                                             ServerVersion.AutoDetect(mySqlConnection)) );
+
+// Configurando o provedor de log customizado definindo o nívem mínimo como information
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
 
 var app = builder.Build();
 
