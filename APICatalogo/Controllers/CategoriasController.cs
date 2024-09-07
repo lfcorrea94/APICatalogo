@@ -26,39 +26,25 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            try
-            {
-                var categorias = _context.Categorias.AsNoTracking().ToList();
+            var categorias = _context.Categorias.AsNoTracking().ToList();
 
-                if (categorias is null) return NotFound("Produtos não encontrados...");
-                return categorias;
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                     "Ocorreu um erro ao tratar a sua solicitação.");
-            }
+            if (categorias is null) return NotFound("Produtos não encontrados...");
+            return categorias;
+
         }
 
         [HttpGet("{id:int}", Name = "ObteCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
-            try
-            {
-                // Teste (tirar o try dps pra testar)
-                // throw new Exception("Exceção ao retornar a categoria pelo Id");
 
-                var categorias = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+            // Teste middleware de exceptions sem tratamentos
+            //throw new Exception("Exceção ao retornar a categoria pelo Id");
 
-                if (categorias == null) return NotFound("Categoria não encontrado...");
+            var categorias = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
 
-                return Ok(categorias);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro ao tratar a sua solicitação.");
-            }
+            if (categorias == null) return NotFound("Categoria não encontrado...");
+
+            return Ok(categorias);
 
         }
 
