@@ -2,6 +2,7 @@ using APICatalogo.Context;
 using APICatalogo.Extensions;
 using APICatalogo.Filters;
 using APICatalogo.Logging;
+using APICatalogo.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -28,6 +29,9 @@ string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConne
 // Instância de builder para definir o provedor, registrar e definir o contexto registrando os serviços no container DI
 builder.Services.AddDbContext<AppDbContext>( options=>options.UseMySql(mySqlConnection,
                                             ServerVersion.AutoDetect(mySqlConnection)) );
+
+// Registro do serviço no container
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 
 // Configurando o provedor de log customizado definindo o nívem mínimo como information
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration

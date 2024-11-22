@@ -1,5 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,78 +11,96 @@ namespace APICatalogo.Controllers
     [ApiController] // Aplica regras de inferência para fontes de dados (abstrair notações como FromBody, FromForm, etc)
     public class CategoriasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoriaRepository _categoriaRepository;
+        private readonly ILogger<CategoriasController> _logger;
 
-        public CategoriasController(AppDbContext context)
+        public CategoriasController(ICategoriaRepository categoriaRepository, ILogger<CategoriasController> logger)
         {
-            _context = context;       
+            _categoriaRepository = categoriaRepository;
+            _logger = logger;
         }
 
-        [HttpGet("produtos")]
+      /*  [HttpGet("produtos")]
         public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
         {
-            return _context.Categorias.Include(p=> p.Produtos).AsNoTracking().ToList();
-        }
+            _logger.LogInformation("========== Get/Categorias/produtos ==========");
+            
+            var categorias = _categoriaRepository.GetCategorias();
+            
+            return Ok(categorias);
+        } */
 
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            var categorias = _context.Categorias.AsNoTracking().ToList();
+            _logger.LogInformation("========== Get/Categorias ==========");
 
-            if (categorias is null) return NotFound("Produtos não encontrados...");
-            return categorias;
+            var categorias = _categoriaRepository.GetCategorias();
+
+            return Ok(categorias);
 
         }
 
         [HttpGet("{id:int}", Name = "ObteCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
-
+            _logger.LogInformation("========== Get/Categorias/{id} ==========");
             // Teste middleware de exceptions sem tratamentos
             //throw new Exception("Exceção ao retornar a categoria pelo Id");
 
-            var categorias = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+            var categorias = _categoriaRepository.GetCategoria(id);
 
-            if (categorias == null) return NotFound("Categoria não encontrado...");
-
+            if (categorias == null)
+            {
+                _logger.LogWarning($"Categoria com id = {id} não encontrada...");
+                return NotFound($"Categoria com id = {id} não encontrada...");
+            }            
             return Ok(categorias);
-
         }
 
         [HttpPost]
         public ActionResult Post(Categoria categoria)
         {
-            if (categoria == null) return BadRequest();
-            _context.Categorias.Add(categoria);
-            _context.SaveChanges();
+            if (categoria == null)
+            {
+                _logger.LogWarning($"Dados inválidos...");
+                return BadRequest();
+            }
+
+            var categoriaCriada = _categoriaRepository.Create(categoria);                        
 
             return new CreatedAtRouteResult("ObterProduto",
-                new { id = categoria.CategoriaId }, categoria);
+                new { id = categoriaCriada.CategoriaId }, categoriaCriada);
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Categoria categoria)
         {
-            if (id != categoria.CategoriaId) return BadRequest();
+            if (id != categoria.CategoriaId)
+            {
+                _logger.LogWarning($"Dados inválidos...");
+                return BadRequest();
+            }
+            var categoriaAtualizada = _categoriaRepository.Update(categoria);            
 
-            _context.Entry(categoria).State = EntityState.Modified;
-            _context.SaveChanges();
-
-            return Ok(categoria);
+            return Ok(categoriaAtualizada);
 
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+            var categoria = _categoriaRepository.GetCategoria(id);
 
-            if (categoria == null) return NotFound(new { retorno = "Categoria não localizado..." });
+            if (categoria == null)
+            {
+                _logger.LogWarning($"Categoria com id = {id} não encontrada...");
+                return NotFound(new { retorno = "Categoria não localizado..." });
+            }
 
-            _context.Categorias.Remove(categoria);
-            _context.SaveChanges();
+            var categoriaExcluida = _categoriaRepository.Delete(id);
 
-            return Ok(categoria);
+            return Ok(categoriaExcluida);
         }
 
     }
