@@ -32,6 +32,7 @@ builder.Services.AddDbContext<AppDbContext>( options=>options.UseMySql(mySqlConn
 
 // Registro do serviço no container
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 
 // Configurando o provedor de log customizado definindo o nívem mínimo como information
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration

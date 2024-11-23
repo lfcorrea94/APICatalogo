@@ -1,5 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,46 +12,33 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class ProdutosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProdutoRepository _repository;
 
-        public ProdutosController(AppDbContext context)
+        public ProdutosController(IProdutoRepository repository)
         {
-                _context = context;
-        }
-
-        // api/produtos
-        //[HttpGet("/primeiro")]
-        //[HttpGet("{valor:alpha:length(5)}")]
-        [HttpGet("primeiro")]
-        public ActionResult<Produto> GetPrimeiro()
-        {
-            var produto = _context.Produtos.AsNoTracking().FirstOrDefault();
-
-            if (produto is null) return NotFound("Produto não encontrados...");
-
-            return produto;
+            _repository = repository;
         }
 
         // api/produtos
         [HttpGet]
         public ActionResult<IEnumerable<Produto>> Get()
         {
-            var produtos = _context.Produtos.AsNoTracking().ToList();
+            var produtos = _repository.GetProdutos().ToList();
 
             if (produtos is null) return NotFound("Produtos não encontrados...");
             
-            return produtos;
+            return Ok(produtos);
         }
 
         // api/produtos/id
         [HttpGet("{id:int:min(1)}", Name="ObterProduto")]
         public ActionResult<Produto> Get(int id)
         {
-            var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.ProdutoId == id);
+            var produto = _repository.GetProduto(id);
          
             if (produto == null) return NotFound("Produto não encontrado");
      
-            return produto;
+            return Ok(produto);
         }
 
         // api/produtos -> mesmo tendo a mesma roda, o verbo é diferente. Então o método só será atendido pelo request POST
@@ -58,11 +46,11 @@ namespace APICatalogo.Controllers
         public ActionResult Post(Produto produto)
         {
             if (produto == null) return BadRequest();
-            _context.Produtos.Add(produto);
-            _context.SaveChanges();
+            var produtoCriado = _repository.Create(produto);
 
             return new CreatedAtRouteResult("ObterProduto",
-                new { id = produto.ProdutoId }, produto);
+                new {id = produtoCriado.ProdutoId}, produtoCriado);
+
         }
 
         // api/produtos/id -> mesmo tendo a mesma roda, o verbo é diferente. Então o método só será atendido pelo request PUT
@@ -71,10 +59,14 @@ namespace APICatalogo.Controllers
         {
             if (id != produto.ProdutoId) return BadRequest();
 
-            _context.Entry(produto).State = EntityState.Modified;
-            _context.SaveChanges();
+           var retorno = _repository.Update(produto);
 
-            return Ok(produto);
+            if (!retorno)
+            {
+                return StatusCode(500, $"Falha ao atualizar o produto de id = {id}");
+            }
+
+            return Ok(retorno);
 
         }
 
@@ -82,14 +74,14 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+            var retorno = _repository.Delete(id);
 
-            if (produto == null) return NotFound(new { retorno = "Produto não localizado..." });
+            if (!retorno)
+            {
+                return StatusCode(500, $"Falha ao excluir o produto de id = {id}");
+            }           
 
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
-
-            return Ok(produto);
+            return Ok($"Produto de id = {id} foi excluído com sucesso.");
 
         }
 

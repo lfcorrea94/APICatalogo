@@ -20,16 +20,6 @@ namespace APICatalogo.Controllers
             _logger = logger;
         }
 
-      /*  [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
-        {
-            _logger.LogInformation("========== Get/Categorias/produtos ==========");
-            
-            var categorias = _categoriaRepository.GetCategorias();
-            
-            return Ok(categorias);
-        } */
-
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {

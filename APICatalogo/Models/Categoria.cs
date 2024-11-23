@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace APICatalogo.Models;
 
@@ -20,8 +21,8 @@ public class Categoria
     [Required]
     [StringLength(300)]
     public string? ImagemUrl { get; set; }
-    
     // FK com a tabela Produtos (só isso já seria o suficiente para mapear a FK, porém,
     // vamos incluir uma propriedade de navegação na classe produto também).
+    [JsonIgnore]
     public ICollection<Produto>? Produtos { get; set; }
 }
