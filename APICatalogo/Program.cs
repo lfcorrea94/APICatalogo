@@ -3,6 +3,8 @@ using APICatalogo.Extensions;
 using APICatalogo.Filters;
 using APICatalogo.Logging;
 using APICatalogo.Repositories;
+using APICatalogo.Repositories.Interface;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -33,6 +35,7 @@ builder.Services.AddDbContext<AppDbContext>( options=>options.UseMySql(mySqlConn
 // Registro do serviço no container
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Configurando o provedor de log customizado definindo o nívem mínimo como information
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
