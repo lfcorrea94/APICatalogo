@@ -11,13 +11,13 @@ namespace APICatalogo.Controllers
     [ApiController] // Aplica regras de inferência para fontes de dados (abstrair notações como FromBody, FromForm, etc)
     public class CategoriasController : ControllerBase
     {
-        private readonly IRepository<Categoria> _categoriaRepository;
+        private readonly IUnitOfWork _uof;
         private readonly ILogger<CategoriasController> _logger;
 
-        public CategoriasController(IRepository<Categoria> categoriaRepository, ILogger<CategoriasController> logger)
+        public CategoriasController(ILogger<CategoriasController> logger, IUnitOfWork uof)
         {
-            _categoriaRepository = categoriaRepository;
             _logger = logger;
+            _uof = uof;
         }
 
         [HttpGet]
@@ -25,7 +25,7 @@ namespace APICatalogo.Controllers
         {
             _logger.LogInformation("========== Get/Categorias ==========");
 
-            var categorias = _categoriaRepository.GetAll();
+            var categorias = _uof.CategoriaRepository.GetAll();
 
             return Ok(categorias);
 
@@ -38,7 +38,7 @@ namespace APICatalogo.Controllers
             // Teste middleware de exceptions sem tratamentos
             //throw new Exception("Exceção ao retornar a categoria pelo Id");
 
-            var categorias = _categoriaRepository.Get(c => c.CategoriaId == id);
+            var categorias = _uof.CategoriaRepository.Get(c => c.CategoriaId == id);
 
             if (categorias == null)
             {
@@ -57,7 +57,9 @@ namespace APICatalogo.Controllers
                 return BadRequest();
             }
 
-            var categoriaCriada = _categoriaRepository.Create(categoria);                        
+            var categoriaCriada = _uof.CategoriaRepository.Create(categoria);
+            
+            _uof.Commit();
 
             return new CreatedAtRouteResult("ObterProduto",
                 new { id = categoriaCriada.CategoriaId }, categoriaCriada);
@@ -71,7 +73,9 @@ namespace APICatalogo.Controllers
                 _logger.LogWarning($"Dados inválidos...");
                 return BadRequest();
             }
-            var categoriaAtualizada = _categoriaRepository.Update(categoria);            
+            var categoriaAtualizada = _uof.CategoriaRepository.Update(categoria);            
+
+            _uof.Commit();
 
             return Ok(categoriaAtualizada);
 
@@ -80,7 +84,7 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var categoria = _categoriaRepository.Get(c => c.CategoriaId == id);
+            var categoria = _uof.CategoriaRepository.Get(c => c.CategoriaId == id);
 
             if (categoria == null)
             {
@@ -88,7 +92,9 @@ namespace APICatalogo.Controllers
                 return NotFound(new { retorno = "Categoria não localizado..." });
             }
 
-            var categoriaExcluida = _categoriaRepository.Delete(categoria);
+            var categoriaExcluida = _uof.CategoriaRepository.Delete(categoria);
+
+            _uof.Commit();
 
             return Ok(categoriaExcluida);
         }
