@@ -4,6 +4,7 @@ using APICatalogo.Models;
 using APICatalogo.Repositories.Interface;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -77,6 +78,30 @@ namespace APICatalogo.Controllers
             return new CreatedAtRouteResult("ObterProduto",
                 new {id = produtoDtoCriado.ProdutoId}, produtoDto);
 
+        }
+
+        [HttpPatch("{id}/UpdatePartial")]
+        public ActionResult<ProdutoDTOUpdateRequest> Patch(int id,
+            JsonPatchDocument<ProdutoDTOUpdateRequest> patchProdutoDTO)
+        {
+            if (patchProdutoDTO == null || id <= 0) return BadRequest();
+
+            var produto = _unitOfWork.ProdutoRepository.Get(c => c.ProdutoId == id);
+
+            if (produto == null) return BadRequest();
+
+            var produtoUpdateRequest = _mapper.Map<ProdutoDTOUpdateRequest>(produto);
+
+            patchProdutoDTO.ApplyTo(produtoUpdateRequest, ModelState);
+
+            if (!ModelState.IsValid || TryValidateModel(produtoUpdateRequest)) return BadRequest(ModelState);
+
+            _mapper.Map(produtoUpdateRequest, produto);
+
+            _unitOfWork.ProdutoRepository.Update(produto);
+            _unitOfWork.Commit();
+
+            return Ok(_mapper.Map<ProdutoDTOUpdateResponse>(produto));
         }
 
         // api/produtos/id -> mesmo tendo a mesma roda, o verbo é diferente. Então o método só será atendido pelo request PUT
