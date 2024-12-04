@@ -29,8 +29,21 @@ namespace APICatalogo.Controllers
         [HttpGet("pagination")]
         public ActionResult<IEnumerable<ProdutoDTO>> get([FromQuery] ProdutosParameters produtosParameters)
         {
-            var produtos = _unitOfWork.ProdutoRepository.GetProdutos(produtosParameters);           
+            var produtos = _unitOfWork.ProdutoRepository.GetProdutos(produtosParameters);
 
+            return ObterProdutos(produtos);
+        }
+
+        [HttpGet("filter/preco/pagination")]
+        public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosFilterPreco([FromQuery] ProdutosFiltroPreco filtro)
+        {
+            var produtos = _unitOfWork.ProdutoRepository.GetProdutosFiltroPreco(filtro);
+
+            return ObterProdutos(produtos);
+        }
+
+        private ActionResult<IEnumerable<ProdutoDTO>> ObterProdutos(PagedList<Produto> produtos)
+        {
             var metadata = new
             {
                 produtos.TotalCount,
@@ -41,12 +54,12 @@ namespace APICatalogo.Controllers
                 produtos.HasPrevious
             };
 
-            // Inclui no header utilizando a lib NewtonSoft.Json
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata)); 
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
             var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
 
             return Ok(produtosDto);
         }
+
         [HttpGet("produtos/{id}")]
         public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosPorCategoria(int id)
         {
